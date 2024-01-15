@@ -30,6 +30,7 @@ const transporter = nodemailer.createTransport({
 
 // Function to send an email
 async function sendEmail(jobTitle, jobLink) {
+    
     console.log("SEND EMAIL")
   const mailOptions = {
     from: emailSender,
@@ -49,40 +50,50 @@ console.log(mailOptions);
 
 // Function to check Upwork RSS feed
 async function checkUpworkFeed() {
-    console.log("I AM HERE")
-  try {
-    // Parse the Upwork RSS feed
-    const feed = await parser.parseURL(upworkRssUrl);
-
-    // Check if there are any entries in the feed
-    if (feed.items.length > 0) {
-      // Get the latest job ID
-      console.log(feed.items[0]);
-      const currentJobId = feed.items[0].id;
-
-      // Check if a new job has been posted
-      if (currentJobId !== latestJobId) {
-        latestJobId = currentJobId;
-
-        // Get job details
-        const jobTitle = feed.items[0].title;
-        const jobLink = feed.items[0].link;
-
-        // Send email
-        await sendEmail(jobTitle, jobLink);
+    new Promise(async(res,rej)=>{
+        console.log("I AM HERE")
+      try {
+        // Parse the Upwork RSS feed
+        const feed = await parser.parseURL(upworkRssUrl);
+    
+        // Check if there are any entries in the feed
+        if (feed.items.length > 0) {
+          // Get the latest job ID
+          console.log(feed.items[0]);
+          const currentJobId = feed.items[0].id;
+    
+          // Check if a new job has been posted
+          if (currentJobId !== latestJobId) {
+            latestJobId = currentJobId;
+    
+            // Get job details
+            const jobTitle = feed.items[0].title;
+            const jobLink = feed.items[0].link;
+    
+            // Send email
+            await sendEmail(jobTitle, jobLink);
+          }
+          res(true);
+        }
+      } catch (error) {
+        rej(false);
+        console.error('Error parsing Upwork RSS feed:', error);
       }
-    }
-  } catch (error) {
-    console.error('Error parsing Upwork RSS feed:', error);
-  }
+
+    })
 }
 
 
 http.createServer(function (req, res) {
     console.log(`Just got a request at ${req.url}!`)
     res.write(`Yo!!!!${process.env.PORT}`);
-    checkUpworkFeed();
-    res.end();
+    checkUpworkFeed().then(()=>{
+        res.end();
+
+    }).catch((err)=>{
+        res.end();
+    });
+
 }).listen(process.env.PORT || 3000);
 
 
