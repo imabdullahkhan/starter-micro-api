@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+
+# Dependency directories
+jspm_packages/
+
+# macOS
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
